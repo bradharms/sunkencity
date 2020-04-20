@@ -3,7 +3,7 @@
 import * as render from '../engines/render.js';
 
 /**
- * @typedef {Object} BackgroundActorData
+ * @typedef {Object} BackgroundManagerData
  * @property {(
  *  render.RenderEngineData
  * )} engineData 
@@ -11,11 +11,11 @@ import * as render from '../engines/render.js';
 
 /**
  * 
- * @param {BackgroundActorData} actorData 
+ * @param {BackgroundManagerData} managerData 
  */
-export function handleRenderBeforeActors(actorData) {
-    const ctx = actorData.engineData.ctx;
-    const canvas = actorData.engineData.canvas;
+export function handleRenderBeforeActors(managerData) {
+    const ctx = managerData.engineData.ctx;
+    const canvas = managerData.engineData.canvas;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
