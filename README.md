@@ -25,7 +25,7 @@ Even though TypeScript is not technically required to compile or run the code, I
 
 ## Application Structure
  
-The game is controlled by an a series of sub-engines (usually just called "engines") that are conceptually organized within a container called the "app." Each engine is responsible for handling a specific aspect of runtime logic, and the app's only job is to coordinate them.
+The game is controlled by a series of sub-engines (usually just called "engines") that are conceptually organized within a container called the "app." Each engine is responsible for handling a specific aspect of runtime logic, and the app's only job is to coordinate them.
 
 ### Application Phases
 
@@ -33,9 +33,9 @@ When the app is constructed, each engine is initialized sequentially as part of 
 
 #### App Creation Phase
 
-The app is initalized with a call to `app.create()`, which allocates and returns general-purpose data structure that the app's engines will store their data in. It then registers each of the passed engines. The engines are each passed as a callback table, with callbacks within the table corresponding to different phases of execution
+The app is initalized with a call to `app.create()`, which allocates and returns general-purpose data structure that the app's engines will store their data in. It then registers each of the passed engines. The engines are each passed as a callback table, with callbacks within the table corresponding to different phases of execution.
 
-#### Registraion Phase
+#### Registration Phase
 
 The registration phase, which is identified by the `handleRegisterEngine()` callback, is responsible for allocating the memory and loading the data used by an engine throughout its lifetime. This is primarily singleton data; it is not re-allocated or de-allocated during the life of the program.
 
