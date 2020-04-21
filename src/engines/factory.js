@@ -1,33 +1,52 @@
 // @ts-check
 
 /**
- * @typedef {Object} FactoryEngineData
- * @property {FactoryActorData[]} actorsData
- * @property {FactoryManager[]} managers
- * @property {FactoryManagerData[]} managersData
+ * @typedef {{
+ *  actorsData: FactoryActorData[];
+ *  managers: FactoryManager[];
+ *  managersData: FactoryManagerData[];
+ * }} FactoryEngineData
  */
 
 /**
- * @typedef {Object} FactoryActorData
- * @property {FactoryEngineData} engineData
- * @property {number} type
- * @property {number} id
+ * @typedef {{
+ *  type: number;
+ *  id: number;
+ *  active: boolean;
+ * }} FactoryActorData
  */
 
 /**
- * @typedef {Object} FactoryManager
- * @property {(
- *  managerData: FactoryManagerData
- * ) => Promise<void>} [handleRegisterManager]
- * @property {(managerData: FactoryManagerData) => void} [handleStartManager]
- * @property {(manager: FactoryManager) => void} [handleDestroyManager]
- * @property {(actorData: FactoryActorData) => void} handleCreateActor
- * @property {(actorData: FactoryActorData) => void} handleDestroyActor
+ * @typedef {{
+ *  id: number;
+ * }} FactoryManagerData 
  */
 
 /**
- * @typedef {Object} FactoryManagerData
- * @property {FactoryEngineData} engineData 
+ * @typedef {{
+ *  handleRegisterManager?(
+ *      managerData: FactoryManagerData,
+ *      engineData: FactoryEngineData
+ *  ): Promise<void>;
+ *  handleStartManager?(
+ *      managerData: FactoryManagerData,
+ *      engineData: FactoryEngineData
+ *  ): void;
+ *  handleDestroyManager?(
+ *      managerData: FactoryManagerData,
+ *      engineData: FactoryEngineData
+ *  ): void;
+ *  handleCreateActor?(
+ *      actorData: FactoryActorData,
+ *      managerData: FactoryManagerData,
+ *      engineData: FactoryEngineData
+ *  ): void;
+ *  handleDestroyActor?(
+ *      actorData: FactoryActorData,
+ *      managerData: FactoryManagerData,
+ *      engineData: FactoryEngineData
+ *  ): void;
+ * }} FactoryManager
  */
 
 /**
@@ -40,73 +59,59 @@ export async function handleRegisterEngine(data) {
 }
 
 /**
- * @param {FactoryEngineData} data 
+ * @param {FactoryEngineData} engineData 
  */
-export async function handleStartEngine(data) {
-    for (let i = 0; i < data.managers.length; i++) {
-        const manager = data.managers[i];
+export async function handleStartEngine(engineData) {
+    for (let i = 0; i < engineData.managers.length; i++) {
+        const manager = engineData.managers[i];
         if (!manager || !manager.handleStartManager) {
             continue;
         }
-        manager.handleStartManager(data.managersData[i]);
+        const managerData = engineData.managersData[i];
+        manager.handleStartManager(managerData, engineData);
     }
 }
 
 /**
- * @template {FactoryManager} T
- * @param {FactoryEngineData} data
- * @param {T} manager 
- */
-export async function registerManager(data, manager) {
-    data.managers.push(manager);
-    const id = data.managers.length - 1;
-    const managerData = {
-        engineData: data,
-    };
-    data.managersData.push(managerData);
+ * @param {FactoryEngineData} engineData
+ * @param {FactoryManager} manager
+ * @param {FactoryManagerData} managerData
+ */ 
+export async function registerManager(engineData, managerData, manager) {
+    const id = managerData.id;
+    engineData.managers[id] = manager;
+    engineData.managersData[id] = managerData;
     if (!manager.handleRegisterManager) {
         return;
     }
-    await manager.handleRegisterManager(managerData);
-    return id;
+    await manager.handleRegisterManager(managerData, engineData);
 }
 
 /**
- * @param {FactoryEngineData} data
- * @param {(
- *  Omit<FactoryActorData, 'engineData'|'id'> & {
- *      engineData?: FactoryEngineData;
- *      id?: number;
- *  }
- * )} actorData
+ * @param {FactoryEngineData} engineData
+ * @param {FactoryActorData} actorData
  */
-export function createActor(data, actorData) {
-    for (let i = 0; i <= data.actorsData.length; i++) {
-        if (data.actorsData[i]) {
-            continue;
-        }
-        actorData.engineData = data;
-        actorData.id = i;
-        data.actorsData[i] = /** @type {FactoryActorData} */ (actorData);
-        const manager = data.managers[actorData.type];
-        if (manager.handleCreateActor) {
-            manager.handleCreateActor(
-                /** @type {FactoryActorData} */ (actorData)
-            );
-        }
+export function createActor(engineData, actorData) {
+    actorData.active = true;
+    engineData.actorsData[actorData.id] = actorData;
+    const manager = engineData.managers[actorData.type];
+    if (!manager.handleCreateActor) {
         return;
     }
+    const managerData = engineData.managersData[actorData.type];
+    manager.handleCreateActor(actorData, managerData, engineData);
 }
 
 /**
- * @param {FactoryEngineData} data
- * @param {number} i 
+ * @param {FactoryEngineData} engineData
+ * @param {FactoryActorData} actorData
  */
-export function removeActorById(data, i) {
-    const actorData = data.actorsData[i];
-    const manager = data.managers[actorData.type];
-    if (manager.handleDestroyActor) {
-        manager.handleDestroyActor(actorData);
+export function destroyActor(engineData, actorData) {
+    const manager = engineData.managers[actorData.type];
+    actorData.active = false;
+    if (!manager.handleDestroyActor) {
+        return;
     }
-    data.actorsData[i] = null;
+    const managerData = engineData.managersData[actorData.id];
+    manager.handleDestroyActor(actorData, managerData, engineData);
 }

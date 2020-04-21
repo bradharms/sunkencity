@@ -1,96 +1,148 @@
 // @ts-check
 
+import * as factory from './factory.js';
+import * as geom from '../geom.js';
+
 /**
- * @typedef {Object} RenderEngineData
- * @property {RenderActorData[]} actorsData
- * @property {RenderManager[]} managers
- * @property {RenderManagerData[]} managersData
- * @property {HTMLCanvasElement} canvas
- * @property {CanvasRenderingContext2D} ctx
+ * @typedef {(
+ *  factory.FactoryEngineData &
+ *  {
+ *      actorsData: RenderActorData[];
+ *      managers: RenderManager[];
+ *      managersData: RenderManagerData[];
+ *      canvas: HTMLCanvasElement;
+ *      ctx: CanvasRenderingContext2D;
+ *  }
+ * )} RenderEngineData
  */
 
 /**
- * @typedef {Object} RenderActorData
- * @property {RenderEngineData} engineData
- * @property {number} type
+ * @typedef {(
+ *  factory.FactoryActorData &
+ *  {
+ *      image: HTMLImageElement;
+ *      pos: geom.Point;
+ *      imageOffset: geom.Point;
+ *      zIndex: number;
+ *  }
+ * )} RenderActorData
  */
 
 /**
- * @typedef {Object} RenderManager
- * @property {(
- *  managerData: RenderManagerData,
- * ) => void} [handleRenderBeforeActors]
- * @property {(actorData: RenderActorData) => void} [handleRenderActor]
- * @property {(
- *  managerData: RenderManagerData
- * ) => void} [handleRenderAfterActors]
+ * @typedef {(
+ *  factory.FactoryManagerData
+ * )} RenderManagerData 
  */
 
 /**
- * @typedef {Object} RenderManagerData
- * @property {RenderEngineData} engineData 
+ * @typedef {{
+ *  handleRenderBeforeActors?(
+ *      managerData: RenderManagerData,
+ *      engineData: RenderEngineData,
+ *  ): void;
+ *  handleRenderActor?(
+ *      actorData: RenderActorData,
+ *      managerData: RenderManagerData,
+ *      engineData: RenderEngineData
+ *  ): void;
+ *  handleRenderAfterActors?(
+ *      managerData: RenderManagerData,
+ *      engineData: RenderEngineData,
+ *  ): void;
+ * }} RenderManager
  */
 
 /**
- * @param {RenderEngineData} data
+ * @param {RenderEngineData} engineData
  */
-export async function handleRegisterEngine(data) {
-    data.canvas = /** @type {*} */ (document.getElementById('canvas'));
-    data.ctx = data.canvas.getContext('2d');
+export async function handleRegisterEngine(engineData) {
+    engineData.canvas = /** @type {*} */ (document.getElementById('canvas'));
+    engineData.ctx = engineData.canvas.getContext('2d');
 }
 
 /**
- * @param {RenderEngineData} data
+ * @param {RenderEngineData} engineData
  */
-export function handleStartEngine(data) {
+export function handleStartEngine(engineData) {
     const handle = () => {
-        render(data);
+        renderAll(engineData);
         window.requestAnimationFrame(handle);
     }
     handle();
 }
 
 /**
- * @param {RenderEngineData} data
+ * @param {RenderEngineData} engineData
  */
-function render(data) {
-    for (let i = 0; i < data.managers.length; i++) {
-        const manager = data.managers[i];
+function renderAll(engineData) {
+    for (let i = 0; i < engineData.managers.length; i++) {
+        const manager = engineData.managers[i];
         if (!manager || !manager.handleRenderBeforeActors) {
             continue;
         }
-        const managerData = data.managersData[i];
-        manager.handleRenderBeforeActors(managerData);
+        const managerData = engineData.managersData[i];
+        manager.handleRenderBeforeActors(managerData, engineData);
     }
-    for (let i = 0; i < data.actorsData.length; i++) {
-        const actor = data.actorsData[i];
-        if (!actor) {
+    for (let i = 0; i < engineData.actorsData.length; i++) {
+        tmpZSortedActors[i] = engineData.actorsData[i];
+    }
+    tmpZSortedActors.sort(sortActorsByZIndex);
+    for (let i = 0; i < tmpZSortedActors.length; i++) {
+        const actorData = tmpZSortedActors[i];
+        if (!actorData || !actorData.active) {
             continue;
         }
-        const manager = data.managers[actor.type];
-        if (!manager.handleRenderActor) {
+        const manager = engineData.managers[actorData.type];
+        if (!manager) {
             continue;
         }
-        const managerData = data.managersData[actor.type];
-        manager.handleRenderActor(actor);
+        const handleRenderActor =
+            manager.handleRenderActor || defaultHandleRenderActor;
+        const managerData = engineData.managersData[actorData.type];
+        handleRenderActor(actorData, managerData, engineData);
     }
-    for (let i = 0; i < data.managers.length; i++) {
-        const manager = data.managers[i];
+    for (let i = 0; i < engineData.managers.length; i++) {
+        const manager = engineData.managers[i];
         if (!manager || !manager.handleRenderAfterActors) {
             continue;
         }
-        const managerData = data.managersData[i];
-        manager.handleRenderAfterActors(managerData);
+        const managerData = engineData.managersData[i];
+        manager.handleRenderAfterActors(managerData, engineData);
     }
+}
+/**
+ * @type {RenderActorData[]} tmpZSortedActors 
+ */
+const tmpZSortedActors = [];
+/**
+ * @param {RenderActorData} a 
+ * @param {RenderActorData} b 
+ */
+function sortActorsByZIndex(a, b) {
+    return b.zIndex - a.zIndex;
 }
 
 /**
- * @param {string} name
+ * @param {RenderActorData} actorData
+ * @param {RenderManagerData} managerData
+ * @param {RenderEngineData} engineData 
  */
-const getImageSrc = (name) => `/assets/img/${name}.png`;
+export function defaultHandleRenderActor(actorData, managerData, engineData) {
+    const image = actorData.image;
+    if (!image) {
+        return;
+    }
+    const pos = actorData.pos || zeroPos;
+    const imageOffset = actorData.imageOffset || zeroPos; 
+    geom.addPoints(pos, imageOffset, tmpPos);
+    engineData.ctx.drawImage(image, tmpPos.x|0, tmpPos.y|0);
+}
+/** @type {geom.Point} */
+const zeroPos = {x: 0, y: 0};
+/** @type {geom.Point} */
+const tmpPos = {x: 0, y: 0};
 
 /**
- * 
  * @param {string} name
  * @return {Promise<HTMLImageElement>}
  */
@@ -100,6 +152,6 @@ export function loadImage(name) {
         imgEl.onload = (e) => {
             resolve(imgEl);
         };
-        imgEl.src = getImageSrc(name);
+        imgEl.src = `/assets/img/${name}.png`;
     });
 }

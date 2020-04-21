@@ -1,83 +1,94 @@
 // @ts-check
 
+import * as factory from './factory.js';
+
 /**
- * @typedef {Object} UpdateEngineData
- * @property {UpdateActorData[]} actorsData
- * @property {UpdateManager[]} managers 
- * @property {UpdateManagerData[]} managersData
+ * @typedef {(
+ *  factory.FactoryEngineData &
+ *  {
+ *      actorsData: UpdateActorData[];
+ *      managers: UpdateManager[];
+ *      managersData: UpdateManagerData[];
+ *  }
+ * )} UpdateEngineData
  */
 
 /**
- * @typedef {Object} UpdateActorData
- * @property {UpdateEngineData} engineData
- * @property {number} type
+ * @typedef {(
+ *  factory.FactoryActorData
+ * )} UpdateActorData
  */
 
 /**
- * @typedef {Object} UpdateManager
- * @property {(
- *  managerData: UpdateManagerData
- * ) => void} handleUpdateBeforeActors
- * @property {(actorData: UpdateActorData) => void} handleUpdateActor
- * @property {(
- *  managerData: UpdateManagerData
- * ) => void} handleUpdateAfterActors 
+ * @typedef {(
+ *  factory.FactoryManagerData
+ * )} UpdateManagerData 
  */
 
 /**
- * @typedef {Object} UpdateManagerData
- * @property {UpdateEngineData} engineData 
+ * @typedef {{
+ *  handleUpdateBeforeActors?(
+ *      managerData: UpdateManagerData,
+ *      engineData: UpdateEngineData,
+ *  ): void;
+ *  handleUpdateActor?(
+ *      actorData: UpdateActorData,
+ *      managerData: UpdateManagerData,
+ *      engineData: UpdateEngineData
+ *  ): void;
+ *  handleUpdateAfterActors?(
+ *      managerData: UpdateManagerData,
+ *      engineData: UpdateEngineData
+ *  ): void; 
+ * }} UpdateManager
  */
-
-const UPDATE_RATE = 1000 / 60;
 
 /**
  * @param {UpdateEngineData} data
  */
-export async function handleRegisterEngine(data) {
-    
-}
+export async function handleRegisterEngine(data) { }
 
 /**
- * @param {UpdateEngineData} data
+ * @param {UpdateEngineData} engineData
  */
-export function handleStartEngine(data) {
+export function handleStartEngine(engineData) {
     const handle = () => {
-        updateActors(data);
+        updateActors(engineData);
         window.requestAnimationFrame(handle);
     }
     handle();
 }
 
 /**
- * @param {UpdateEngineData} data
+ * @param {UpdateEngineData} engineData
  */
-function updateActors(data) {
-    for (let i = 0; i < data.managers.length; i++) {
-        const manager = data.managers[i];
+function updateActors(engineData) {
+    for (let i = 0; i < engineData.managers.length; i++) {
+        const manager = engineData.managers[i];
         if (!manager || !manager.handleUpdateBeforeActors) {
             continue;
         }
-        const managerData = data.managersData[i];
-        manager.handleUpdateBeforeActors(managerData);
+        const managerData = engineData.managersData[i];
+        manager.handleUpdateBeforeActors(managerData, engineData);
     }
-    for (let i = 0; i < data.actorsData.length; i++) {
-        const actor = data.actorsData[i];
-        if (!actor) {
+    for (let i = 0; i < engineData.actorsData.length; i++) {
+        const actorData = engineData.actorsData[i];
+        if (!actorData) {
             continue;
         }
-        const manager = data.managers[actor.type];
+        const manager = engineData.managers[actorData.type];
         if (!manager.handleUpdateActor) {
             continue;
         }
-        manager.handleUpdateActor(actor);
+        const managerData = engineData.managersData[actorData.type];
+        manager.handleUpdateActor(actorData, managerData, engineData);
     }
-    for (let i = 0; i < data.managers.length; i++) {
-        const manager = data.managers[i];
+    for (let i = 0; i < engineData.managers.length; i++) {
+        const manager = engineData.managers[i];
         if (!manager || !manager.handleUpdateBeforeActors) {
             continue;
         }
-        const managerData = data.managersData[i];
-        manager.handleUpdateAfterActors(managerData);
+        const managerData = engineData.managersData[i];
+        manager.handleUpdateAfterActors(managerData, engineData);
     }
 }

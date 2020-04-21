@@ -7,11 +7,16 @@ import * as input from './engines/input.js';
 import * as render from './engines/render.js';
 import * as update from './engines/update.js';
 
-import * as background from './managers/background.js';
-import * as player from './managers/player.js';
+import * as background from './actors/background.js';
+import * as player from './actors/player.js';
+
+const AT_PLAYER = 0;
+const AT_BACKGROUND = 1;
+const AT_WALL = 2;
+const AID_PLAYER = 0;
 
 window.onload = async function main() {
-    const appData = /** @type {(
+    const engineData = /** @type {(
         app.AppData &
         factory.FactoryEngineData &
         input.InputEngineData &
@@ -24,23 +29,39 @@ window.onload = async function main() {
         render,
     ]));
     
-    const tBackground =
-        await factory.registerManager(appData, /** @type {*} */ (background));
+    /** @type {player.PlayerManagerData} */
+    const mdPlayer = {
+        image: null,
+        id: AT_PLAYER,
+    };
 
-    const tPlayer =
-        await factory.registerManager(appData, /** @type {*} */ (player));
+    /** @type {background.BackgroundManagerData} */
+    const mdBackground = {
+        id: AT_BACKGROUND,
+    };
+    
+    await factory.registerManager(engineData, mdBackground, background.manager);
+    await factory.registerManager(engineData, mdPlayer, player.manager);
 
-    /** @type {player.PlayerActorData} */
-    const aPlayer =  {
-        id: null,
-        engineData: null,
-        type: tPlayer,
+    /**
+     * @type {player.PlayerActorData} 
+     */
+    const aPlayer = {
+        active: false,
         pos: {
             x: 30,
             y: 30,
-        }
+        },
+        id: AID_PLAYER,
+        image: null,
+        imageOffset: {
+            x: 0,
+            y: 0,
+        },
+        type: AT_PLAYER,
+        zIndex: 0,
     };
-    factory.createActor(appData, aPlayer);
+    factory.createActor(engineData, aPlayer);
 
-    app.start(appData);
+    app.start(engineData);
 }
