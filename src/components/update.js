@@ -10,6 +10,13 @@ import * as factory from './factory.js';
  *      actorsData: UpdateActorData[];
  *      managers: UpdateManager[];
  *      managersData: UpdateManagerData[];
+ *      updaters: [
+ *          Updater[],
+ *          Updater[],
+ *          Updater[],
+ *          Updater[],
+ *          Updater[]
+ *      ];
  *  }
  * )} UpdateEngineData
  */
@@ -27,20 +34,16 @@ import * as factory from './factory.js';
  */
 
 /**
+ * @typedef {(engineData: UpdateEngineData) => void} Updater
+ */
+
+/**
  * @typedef {{
- *  handleUpdateBeforeActors?(
- *      managerData: UpdateManagerData,
- *      engineData: UpdateEngineData,
- *  ): void;
  *  handleUpdateActor?(
  *      actorData: UpdateActorData,
  *      managerData: UpdateManagerData,
  *      engineData: UpdateEngineData
  *  ): void;
- *  handleUpdateAfterActors?(
- *      managerData: UpdateManagerData,
- *      engineData: UpdateEngineData
- *  ): void; 
  * }} UpdateManager
  */
 
@@ -49,16 +52,19 @@ import * as factory from './factory.js';
  */
 export const engine = {
     /**
-     * @param {UpdateEngineData} data
+     * @param {UpdateEngineData} engineData
      */
-    async handleRegisterEngine(data) { },
+    async handleRegisterEngine(engineData) {
+        engineData.updaters = [[], [], [], [], []];
+        registerUpdater(engineData, handleUpdateActors, 2);
+    },
     
     /**
      * @param {UpdateEngineData} engineData
      */
     handleStartEngine(engineData) {
         const handle = () => {
-            updateAll(engineData);
+            runUpdaters(engineData);
             window.requestAnimationFrame(handle);
         }
         handle();
@@ -67,16 +73,30 @@ export const engine = {
 
 /**
  * @param {UpdateEngineData} engineData
+ * @param {Updater} updater
+ * @param {0|1|2|3|4} phase
  */
-function updateAll(engineData) {
-    for (let i = 0; i < engineData.managers.length; i++) {
-        const manager = engineData.managers[i];
-        if (!manager || !manager.handleUpdateBeforeActors) {
-            continue;
+export function registerUpdater(engineData, updater, phase) {
+    engineData.updaters[phase].push(updater);
+}
+
+/**
+ * @param {UpdateEngineData} engineData
+ */
+function runUpdaters(engineData) {
+    for (let i = 0; i < engineData.updaters.length; i++) {
+        const updaters = engineData.updaters[i];
+        for (let j = 0; j < updaters.length; j++) {
+            const updater = updaters[j];
+            updater(engineData);
         }
-        const managerData = engineData.managersData[i];
-        manager.handleUpdateBeforeActors(managerData, engineData);
     }
+}
+
+/**
+ * @param {UpdateEngineData} engineData
+ */
+function handleUpdateActors(engineData) {
     for (let i = 0; i < engineData.actorsData.length; i++) {
         const actorData = engineData.actorsData[i];
         if (!actorData || !actorData.active) {
@@ -88,13 +108,5 @@ function updateAll(engineData) {
         }
         const managerData = engineData.managersData[actorData.type];
         manager.handleUpdateActor(actorData, managerData, engineData);
-    }
-    for (let i = 0; i < engineData.managers.length; i++) {
-        const manager = engineData.managers[i];
-        if (!manager || !manager.handleUpdateBeforeActors) {
-            continue;
-        }
-        const managerData = engineData.managersData[i];
-        manager.handleUpdateAfterActors(managerData, engineData);
     }
 }

@@ -2,11 +2,13 @@
 
 import * as app from '../app.js';
 import * as factory from './factory.js';
+import * as update from './update.js';
 import * as geom from '../geom.js';
 
 /**
  * @typedef {(
  *  factory.FactoryEngineData &
+ *  update.UpdateEngineData &
  *  {
  *      actorsData: RenderActorData[];
  *      managers: RenderManager[];
@@ -19,7 +21,15 @@ import * as geom from '../geom.js';
 
 /**
  * @typedef {(
+ *  factory.FactoryManagerData &
+ *  update.UpdateManagerData
+ * )} RenderManagerData 
+ */
+
+/**
+ * @typedef {(
  *  factory.FactoryActorData &
+ *  update.UpdateActorData &
  *  {
  *      image: HTMLImageElement;
  *      pos: geom.Point;
@@ -27,12 +37,6 @@ import * as geom from '../geom.js';
  *      zIndex: number;
  *  }
  * )} RenderActorData
- */
-
-/**
- * @typedef {(
- *  factory.FactoryManagerData
- * )} RenderManagerData 
  */
 
 /**
@@ -64,24 +68,17 @@ export const engine = {
         engineData.canvas =
             /** @type {*} */ (document.getElementById('canvas'));
         engineData.ctx = engineData.canvas.getContext('2d');
-    },
-    
-    /**
-     * @param {RenderEngineData} engineData
-     */
-    handleStartEngine(engineData) {
-        const handle = () => {
-            renderAll(engineData);
-            window.requestAnimationFrame(handle);
-        }
-        handle();
+        console.log('about to register render handlers');
+        update.registerUpdater(engineData, handleRenderBeforeActors, 3);
+        update.registerUpdater(engineData, handleRenderActors, 3);
+        update.registerUpdater(engineData, handleRenderAfterActors, 3);
     },
 };
 
 /**
  * @param {RenderEngineData} engineData
  */
-function renderAll(engineData) {
+function handleRenderBeforeActors(engineData) {
     for (let i = 0; i < engineData.managers.length; i++) {
         const manager = engineData.managers[i];
         if (!manager || !manager.handleRenderBeforeActors) {
@@ -90,6 +87,12 @@ function renderAll(engineData) {
         const managerData = engineData.managersData[i];
         manager.handleRenderBeforeActors(managerData, engineData);
     }
+}
+
+/**
+ * @param {RenderEngineData} engineData 
+ */
+function handleRenderActors(engineData) {
     for (let i = 0; i < engineData.actorsData.length; i++) {
         tmpZSortedActors[i] = engineData.actorsData[i];
     }
@@ -108,14 +111,6 @@ function renderAll(engineData) {
         const managerData = engineData.managersData[actorData.type];
         handleRenderActor(actorData, managerData, engineData);
     }
-    for (let i = 0; i < engineData.managers.length; i++) {
-        const manager = engineData.managers[i];
-        if (!manager || !manager.handleRenderAfterActors) {
-            continue;
-        }
-        const managerData = engineData.managersData[i];
-        manager.handleRenderAfterActors(managerData, engineData);
-    }
 }
 /**
  * @type {RenderActorData[]} tmpZSortedActors 
@@ -130,6 +125,20 @@ function sortActorsByZIndex(a, b) {
 }
 
 /**
+ * @param {RenderEngineData} engineData
+ */
+function handleRenderAfterActors(engineData) {
+    for (let i = 0; i < engineData.managers.length; i++) {
+        const manager = engineData.managers[i];
+        if (!manager || !manager.handleRenderAfterActors) {
+            continue;
+        }
+        const managerData = engineData.managersData[i];
+        manager.handleRenderAfterActors(managerData, engineData);
+    }
+}
+
+/**
  * @param {RenderActorData} actorData
  * @param {RenderManagerData} managerData
  * @param {RenderEngineData} engineData 
@@ -141,7 +150,7 @@ export function defaultHandleRenderActor(actorData, managerData, engineData) {
     }
     const pos = actorData.pos || zeroPos;
     const imageOffset = actorData.imageOffset || zeroPos; 
-    geom.addPoints(pos, imageOffset, tmpPos);
+    geom.move(pos, imageOffset, tmpPos);
     engineData.ctx.drawImage(image, tmpPos.x|0, tmpPos.y|0);
 }
 /** @type {geom.Point} */

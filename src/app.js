@@ -26,7 +26,7 @@ export async function create(engines) {
     for (let i = 0; i < engines.length; i++) {
         const engine = engines[i];
         data.engines.push(engine);
-        if (!engine || !engine.handleStartEngine) {
+        if (!engine || !engine.handleRegisterEngine) {
             continue;
         }
         await engine.handleRegisterEngine(data);
