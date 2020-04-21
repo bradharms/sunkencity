@@ -1,5 +1,6 @@
 // @ts-check
 
+import * as app from '../app.js';
 import * as factory from './factory.js';
 import * as geom from '../geom.js';
 
@@ -53,23 +54,29 @@ import * as geom from '../geom.js';
  */
 
 /**
- * @param {RenderEngineData} engineData
+ * @type {app.Engine}
  */
-export async function handleRegisterEngine(engineData) {
-    engineData.canvas = /** @type {*} */ (document.getElementById('canvas'));
-    engineData.ctx = engineData.canvas.getContext('2d');
-}
-
-/**
- * @param {RenderEngineData} engineData
- */
-export function handleStartEngine(engineData) {
-    const handle = () => {
-        renderAll(engineData);
-        window.requestAnimationFrame(handle);
-    }
-    handle();
-}
+export const engine = {
+    /**
+     * @param {RenderEngineData} engineData
+     */
+    async handleRegisterEngine(engineData) {
+        engineData.canvas =
+            /** @type {*} */ (document.getElementById('canvas'));
+        engineData.ctx = engineData.canvas.getContext('2d');
+    },
+    
+    /**
+     * @param {RenderEngineData} engineData
+     */
+    handleStartEngine(engineData) {
+        const handle = () => {
+            renderAll(engineData);
+            window.requestAnimationFrame(handle);
+        }
+        handle();
+    },
+};
 
 /**
  * @param {RenderEngineData} engineData

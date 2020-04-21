@@ -2,10 +2,10 @@
 
 import * as app from './app.js';
 
-import * as factory from './engines/factory.js';
-import * as input from './engines/input.js';
-import * as render from './engines/render.js';
-import * as update from './engines/update.js';
+import * as factory from './components/factory.js';
+import * as input from './components/input.js';
+import * as render from './components/render.js';
+import * as update from './components/update.js';
 
 import * as background from './actors/background.js';
 import * as player from './actors/player.js';
@@ -24,10 +24,10 @@ window.onload = async function main() {
         render.RenderEngineData &
         update.UpdateEngineData
     )} */ (await app.create([
-        factory,
-        input,
-        update,
-        render,
+        factory.engine,
+        input.engine,
+        update.engine,
+        render.engine,
     ]));
     
     /** @type {player.PlayerManagerData} */

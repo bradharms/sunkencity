@@ -1,7 +1,7 @@
 // @ts-check
 
-import * as factory from '../engines/factory.js';
-import * as render from '../engines/render.js';
+import * as factory from '../components/factory.js';
+import * as render from '../components/render.js';
 
 /**
  * @typedef {(

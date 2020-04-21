@@ -1,5 +1,6 @@
 // @ts-check
 
+import * as app from '../app.js';
 import * as geom from '../geom.js';
 
 /**
@@ -25,39 +26,44 @@ export const COS_45 = Math.cos(Math.PI / 4);
 export const SIN_45 = Math.sin(Math.PI / 4);
 
 /**
- * @param {InputEngineData} data
+ * @type {app.Engine}
  */
-export async function handleRegisterEngine(data) {
-    data.inputDirs = {
-        left: false,
-        right: false,
-        up: false,
-        down: false,
-    };
-    data.inputPos = { x: 0, y: 0 };
-}
-
-/**
- * @param {InputEngineData} data
- */
-export function handleStartEngine(data) {
+export const engine = {
     /**
-     * @param {KeyboardEvent} e
+     * @param {InputEngineData} data
      */
-    const runKeyboard = (e) => {
-        handleKeyboardEvent(e, data);
-    }
-    window.addEventListener('keydown', runKeyboard);
-    window.addEventListener('keyup', runKeyboard);
-    return;
-}
+    async  handleRegisterEngine(data) {
+        data.inputDirs = {
+            left: false,
+            right: false,
+            up: false,
+            down: false,
+        };
+        data.inputPos = { x: 0, y: 0 };
+    },
+
+    /**
+     * @param {InputEngineData} data
+     */
+    handleStartEngine(data) {
+        /**
+         * @param {KeyboardEvent} e
+         */
+        const runKeyboard = (e) => {
+            handleKeyboardEvent(e, data);
+        }
+        window.addEventListener('keydown', runKeyboard);
+        window.addEventListener('keyup', runKeyboard);
+        return;
+    },
+};
 
 /**
  * 
  * @param {KeyboardEvent} e 
  * @param {InputEngineData} data
  */
-export function handleKeyboardEvent(e, data) {
+function handleKeyboardEvent(e, data) {
     const active = e.type === 'keydown';
     switch (e.key) {
         case K_LEFT:

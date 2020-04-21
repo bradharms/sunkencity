@@ -1,5 +1,6 @@
 // @ts-check
 
+import * as app from '../app.js';
 import * as factory from './factory.js';
 
 /**
@@ -44,19 +45,24 @@ import * as factory from './factory.js';
  */
 
 /**
- * @param {UpdateEngineData} data
+ * @type {app.Engine}
  */
-export async function handleRegisterEngine(data) { }
-
-/**
- * @param {UpdateEngineData} engineData
- */
-export function handleStartEngine(engineData) {
-    const handle = () => {
-        updateAll(engineData);
-        window.requestAnimationFrame(handle);
-    }
-    handle();
+export const engine = {
+    /**
+     * @param {UpdateEngineData} data
+     */
+    async handleRegisterEngine(data) { },
+    
+    /**
+     * @param {UpdateEngineData} engineData
+     */
+    handleStartEngine(engineData) {
+        const handle = () => {
+            updateAll(engineData);
+            window.requestAnimationFrame(handle);
+        }
+        handle();
+    },
 }
 
 /**

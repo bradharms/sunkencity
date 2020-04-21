@@ -1,10 +1,10 @@
 // @ts-check
 
 import * as app from '../app.js';
-import * as render from '../engines/render.js';
-import * as factory from '../engines/factory.js';
-import * as input from '../engines/input.js';
-import * as update from '../engines/update.js';
+import * as render from '../components/render.js';
+import * as factory from '../components/factory.js';
+import * as input from '../components/input.js';
+import * as update from '../components/update.js';
 
 /** @typedef {(
  *      factory.FactoryEngineData &

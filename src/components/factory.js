@@ -1,5 +1,7 @@
 // @ts-check
 
+import * as app from '../app.js';
+
 /**
  * @typedef {{
  *  actorsData: FactoryActorData[];
@@ -55,39 +57,44 @@
  */
 
 /**
- * @param {FactoryEngineData} data 
+ * @type {app.Engine}
  */
-export async function handleRegisterEngine(data) {
-    data.actorsData = [];
-    data.managers = [];
-    data.managersData = [];
-}
-
-/**
- * @param {FactoryEngineData} engineData 
- */
-export async function handleStartEngine(engineData) {
-    for (let i = 0; i < engineData.managers.length; i++) {
-        const manager = engineData.managers[i];
-        if (!manager || !manager.handleStartManager) {
-            continue;
+export const engine = {
+    /**
+     * @param {FactoryEngineData} data 
+     */
+    async handleRegisterEngine(data) {
+        data.actorsData = [];
+        data.managers = [];
+        data.managersData = [];
+    },
+    
+    /**
+     * @param {FactoryEngineData} engineData 
+     */
+    async handleStartEngine(engineData) {
+        for (let i = 0; i < engineData.managers.length; i++) {
+            const manager = engineData.managers[i];
+            if (!manager || !manager.handleStartManager) {
+                continue;
+            }
+            const managerData = engineData.managersData[i];
+            manager.handleStartManager(managerData, engineData);
         }
-        const managerData = engineData.managersData[i];
-        manager.handleStartManager(managerData, engineData);
+        for (let i = 0; i < engineData.actorsData.length; i++) {
+            const actorData = engineData.actorsData[i];
+            if (!actorData || !actorData.active) {
+                continue;
+            }
+            const manager = engineData.managers[actorData.type];
+            if (!manager || !manager.handleStartActor) {
+                continue;
+            }
+            const managerData = engineData.managersData[actorData.type];
+            manager.handleStartActor(actorData, managerData, engineData);
+        }
     }
-    for (let i = 0; i < engineData.actorsData.length; i++) {
-        const actorData = engineData.actorsData[i];
-        if (!actorData || !actorData.active) {
-            continue;
-        }
-        const manager = engineData.managers[actorData.type];
-        if (!manager || !manager.handleStartActor) {
-            continue;
-        }
-        const managerData = engineData.managersData[actorData.type];
-        manager.handleStartActor(actorData, managerData, engineData);
-    }
-}
+};
 
 /**
  * @param {FactoryEngineData} engineData
