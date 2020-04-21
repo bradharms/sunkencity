@@ -41,6 +41,11 @@
  *      managerData: FactoryManagerData,
  *      engineData: FactoryEngineData
  *  ): void;
+ *  handleStartActor?(
+ *      actorData: FactoryActorData,
+ *      managerData: FactoryManagerData,
+ *      engineData: FactoryEngineData,
+ *  ): void;
  *  handleDestroyActor?(
  *      actorData: FactoryActorData,
  *      managerData: FactoryManagerData,
@@ -69,6 +74,18 @@ export async function handleStartEngine(engineData) {
         }
         const managerData = engineData.managersData[i];
         manager.handleStartManager(managerData, engineData);
+    }
+    for (let i = 0; i < engineData.actorsData.length; i++) {
+        const actorData = engineData.actorsData[i];
+        if (!actorData || !actorData.active) {
+            continue;
+        }
+        const manager = engineData.managers[actorData.type];
+        if (!manager || !manager.handleStartActor) {
+            continue;
+        }
+        const managerData = engineData.managersData[actorData.type];
+        manager.handleStartActor(actorData, managerData, engineData);
     }
 }
 

@@ -9,6 +9,7 @@ import * as update from './engines/update.js';
 
 import * as background from './actors/background.js';
 import * as player from './actors/player.js';
+import * as wall from './actors/wall.js';
 
 const AT_PLAYER = 0;
 const AT_BACKGROUND = 1;
@@ -39,9 +40,16 @@ window.onload = async function main() {
     const mdBackground = {
         id: AT_BACKGROUND,
     };
+
+    /** @type {wall.WallManagerData} */
+    const mdWall = {
+        id: AT_WALL,
+        images: [],
+    };
     
     await factory.registerManager(engineData, mdBackground, background.manager);
     await factory.registerManager(engineData, mdPlayer, player.manager);
+    await factory.registerManager(engineData, mdWall, wall.manager);
 
     /**
      * @type {player.PlayerActorData} 

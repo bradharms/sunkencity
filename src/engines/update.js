@@ -53,7 +53,7 @@ export async function handleRegisterEngine(data) { }
  */
 export function handleStartEngine(engineData) {
     const handle = () => {
-        updateActors(engineData);
+        updateAll(engineData);
         window.requestAnimationFrame(handle);
     }
     handle();
@@ -62,7 +62,7 @@ export function handleStartEngine(engineData) {
 /**
  * @param {UpdateEngineData} engineData
  */
-function updateActors(engineData) {
+function updateAll(engineData) {
     for (let i = 0; i < engineData.managers.length; i++) {
         const manager = engineData.managers[i];
         if (!manager || !manager.handleUpdateBeforeActors) {
@@ -73,7 +73,7 @@ function updateActors(engineData) {
     }
     for (let i = 0; i < engineData.actorsData.length; i++) {
         const actorData = engineData.actorsData[i];
-        if (!actorData) {
+        if (!actorData || !actorData.active) {
             continue;
         }
         const manager = engineData.managers[actorData.type];
