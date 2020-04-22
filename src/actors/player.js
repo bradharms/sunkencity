@@ -67,8 +67,9 @@ export const manager = {
      * @param {PlayerEngineData} engineData
      */
     handleUpdateActor(actorData, managerData, engineData) {
+        actorData.imageOffset.y = -16;
         actorData.pos.x += engineData.inputPos.x;
         actorData.pos.y += engineData.inputPos.y;
-        actorData.zIndex = actorData.pos.y;
+        actorData.zIndex = -actorData.pos.y;
     }
 };

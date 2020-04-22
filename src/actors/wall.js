@@ -15,7 +15,7 @@ import * as render from '../components/render.js';
  *  factory.FactoryManagerData &
  *  render.RenderManagerData &
  *  {
- *      images: HTMLImageElement[]
+ *      images: HTMLImageElement[],
  *  }
  * )} WallManagerData
  */
@@ -23,7 +23,10 @@ import * as render from '../components/render.js';
 /**
  * @typedef {(
  *  factory.FactoryActorData &
- *  render.RenderActorData
+ *  render.RenderActorData &
+ *  {
+ *      shape: number,
+ *  }
  * )} WallActorData 
  */
 
@@ -53,6 +56,18 @@ export const manager = {
      * @param {WallEngineData} engineData
      */
     handleStartActor(actorData, managerData, engineData) {
+        actorData.image = managerData.images[actorData.shape];
 
-    }
+        if (actorData.shape < 2) {
+            actorData.zIndex = 1000;
+        } else if (actorData.shape == 2) {
+            actorData.zIndex = -actorData.pos.y;
+        } else {
+            actorData.zIndex = -1000;
+        }
+
+        if (actorData.shape >= 2) {
+            actorData.imageOffset.y = -16;
+        }
+    },
 };

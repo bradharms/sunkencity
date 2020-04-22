@@ -14,7 +14,13 @@ import * as wall from './actors/wall.js';
 const AT_PLAYER = 0;
 const AT_BACKGROUND = 1;
 const AT_WALL = 2;
-const AID_PLAYER = 0;
+
+const AID0_PLAYER = 0;
+const AIDN_PLAYER = 0;
+const AID0_BACKGROUND = 1;
+const AIDN_BACKGROUND = 1
+const AID0_WALL = 2;
+const AIDN_WALL = 62;
 
 window.onload = async function main() {
     const engineData = /** @type {(
@@ -57,10 +63,10 @@ window.onload = async function main() {
     const aPlayer = {
         active: false,
         pos: {
-            x: 30,
-            y: 30,
+            x: 32,
+            y: 64,
         },
-        id: AID_PLAYER,
+        id: AID0_PLAYER,
         image: null,
         imageOffset: {
             x: 0,
@@ -70,6 +76,36 @@ window.onload = async function main() {
         zIndex: 0,
     };
     factory.createActor(engineData, aPlayer);
+
+    let x = 0;
+    let y = 16;
+    for (let id = AID0_WALL; id <= AIDN_WALL; id++) {
+        /**
+         * @type {wall.WallActorData}
+         */
+        const aWall = {
+            type: AT_WALL,
+            id,
+            active: false,
+            image: null,
+            zIndex: 0,
+            imageOffset: { x: 0, y: 0 },
+            pos: { x, y },
+            shape: (
+                ((x == 0 || x == (16 * 9)) && y == 16) ? 4 :
+                (x == 0 || x == (16 * 9)) ? 3 :
+                (y == 16 || y == (16 * 6)) ? 2 :
+                y == 32 ? 1 :
+                0
+            ),
+        };
+        factory.createActor(engineData, aWall);
+        x += 16;
+        if (x >= 10 * 16) {
+            x = 0;
+            y += 16;
+        }
+    }
 
     app.start(engineData);
 }
