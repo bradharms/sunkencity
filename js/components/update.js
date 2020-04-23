@@ -54,7 +54,7 @@ export const engine = {
     /**
      * @param {UpdateEngineData} engineData
      */
-    async handleRegisterEngine(engineData) {
+    async onRegister(engineData) {
         engineData.updaters = [[], [], [], [], []];
         registerUpdater(engineData, handleUpdateActors, 2);
     },
@@ -62,7 +62,7 @@ export const engine = {
     /**
      * @param {UpdateEngineData} engineData
      */
-    handleStartEngine(engineData) {
+    onStart(engineData) {
         const handle = () => {
             runUpdaters(engineData);
             window.requestAnimationFrame(handle);

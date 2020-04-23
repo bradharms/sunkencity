@@ -63,7 +63,7 @@ export const engine = {
     /**
      * @param {FactoryEngineData} data 
      */
-    async handleRegisterEngine(data) {
+    async onRegister(data) {
         data.actorsData = [];
         data.managers = [];
         data.managersData = [];
@@ -72,7 +72,7 @@ export const engine = {
     /**
      * @param {FactoryEngineData} engineData 
      */
-    async handleStartEngine(engineData) {
+    async onStart(engineData) {
         for (let i = 0; i < engineData.managers.length; i++) {
             const manager = engineData.managers[i];
             if (!manager || !manager.handleStartManager) {

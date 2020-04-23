@@ -64,7 +64,7 @@ export const engine = {
     /**
      * @param {RenderEngineData} engineData
      */
-    async handleRegisterEngine(engineData) {
+    async onRegister(engineData) {
         engineData.canvas =
             /** @type {*} */ (document.getElementById('canvas'));
         engineData.ctx = engineData.canvas.getContext('2d');

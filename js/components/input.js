@@ -32,7 +32,7 @@ export const engine = {
     /**
      * @param {InputEngineData} data
      */
-    async  handleRegisterEngine(data) {
+    async  onRegister(data) {
         data.inputDirs = {
             left: false,
             right: false,
@@ -45,7 +45,7 @@ export const engine = {
     /**
      * @param {InputEngineData} data
      */
-    handleStartEngine(data) {
+    onStart(data) {
         /**
          * @param {KeyboardEvent} e
          */

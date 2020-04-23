@@ -7,8 +7,8 @@
 
 /**
  * @typedef {Object} Engine
- * @property {(data: any) => Promise<void>} [handleRegisterEngine]
- * @property {(data: any) => void} [handleStartEngine] 
+ * @property {(data: any) => Promise<void>} [onRegister]
+ * @property {(data: any) => void} [onStart] 
  */
 
 /**
@@ -26,10 +26,10 @@ export async function create(engines) {
     for (let i = 0; i < engines.length; i++) {
         const engine = engines[i];
         data.engines.push(engine);
-        if (!engine || !engine.handleRegisterEngine) {
+        if (!engine || !engine.onRegister) {
             continue;
         }
-        await engine.handleRegisterEngine(data);
+        await engine.onRegister(data);
     }
 
     return data;
@@ -41,9 +41,9 @@ export async function create(engines) {
 export function start(data) {
     for (let i = 0; i < data.engines.length; i++) {
         const engine = data.engines[i];
-        if (!engine || !engine.handleStartEngine) {
+        if (!engine || !engine.onStart) {
             continue;
         }
-        engine.handleStartEngine(data);
+        engine.onStart(data);
     }
 }
