@@ -7,8 +7,8 @@
 
 /**
  * @typedef {Object} Engine
- * @property {(data: any) => Promise<void>} [onRegister]
- * @property {(data: any) => void} [onStart] 
+ * @property {(engineData: any) => Promise<void>} [onRegister]
+ * @property {(engineData: any) => void} [onStart] 
  */
 
 /**

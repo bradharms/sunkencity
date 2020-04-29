@@ -20,7 +20,12 @@ const AIDN_PLAYER = 0;
 const AID0_BACKGROUND = 1;
 const AIDN_BACKGROUND = 1
 const AID0_WALL = 2;
-const AIDN_WALL = 62;
+const AIDN_WALL = 136;
+
+const SCREEN = {
+    x: 240,
+    y: 160,
+}
 
 window.onload = async function main() {
     const engineData = /** @type {(
@@ -35,6 +40,8 @@ window.onload = async function main() {
         update.engine,
         render.engine,
     ]));
+    engineData.canvas.width = SCREEN.x;
+    engineData.canvas.height = SCREEN.y;
     
     /** @type {player.PlayerManagerData} */
     const mdPlayer = {
@@ -92,16 +99,16 @@ window.onload = async function main() {
             imageOffset: { x: 0, y: 0 },
             pos: { x, y },
             shape: (
-                ((x == 0 || x == (16 * 9)) && y == 16) ? 4 :
-                (x == 0 || x == (16 * 9)) ? 3 :
-                (y == 16 || y == (16 * 6)) ? 2 :
+                ((x == 0 || x == (SCREEN.x - 16)) && y == 16) ? 4 :
+                (x == 0 || x == (SCREEN.x - 16)) ? 3 :
+                (y == 16 || y == (SCREEN.y - 16)) ? 2 :
                 y == 32 ? 1 :
                 0
             ),
         };
         factory.createActor(engineData, aWall);
         x += 16;
-        if (x >= 10 * 16) {
+        if (x >= SCREEN.x) {
             x = 0;
             y += 16;
         }

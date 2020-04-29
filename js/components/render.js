@@ -65,14 +65,21 @@ export const engine = {
      * @param {RenderEngineData} engineData
      */
     async onRegister(engineData) {
-        engineData.canvas =
-            /** @type {*} */ (document.getElementById('canvas'));
+        engineData.canvas = document.createElement('canvas');
         engineData.ctx = engineData.canvas.getContext('2d');
         console.log('about to register render handlers');
         update.registerUpdater(engineData, handleRenderBeforeActors, 3);
         update.registerUpdater(engineData, handleRenderActors, 3);
         update.registerUpdater(engineData, handleRenderAfterActors, 3);
     },
+
+    /**
+     * @param {RenderEngineData} engineData 
+     */
+    async onStart(engineData) {
+        const container = document.getElementById('canvasContainer');
+        container.appendChild(engineData.canvas);
+    }
 };
 
 /**
