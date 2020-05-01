@@ -2,11 +2,13 @@
 
 import * as factory from '../components/factory.js';
 import * as render from '../components/render.js';
+import * as collision from '../components/collision.js';
 
 /**
  * @typedef {(
  *  factory.FactoryEngineData &
- *  render.RenderEngineData
+ *  render.RenderEngineData &
+ *  collision.CollisionEngineData
  * )} WallEngineData 
  */
 
@@ -14,6 +16,7 @@ import * as render from '../components/render.js';
  * @typedef {(
  *  factory.FactoryManagerData &
  *  render.RenderManagerData &
+ *  collision.CollisionManagerData &
  *  {
  *      images: HTMLImageElement[],
  *  }
@@ -24,6 +27,7 @@ import * as render from '../components/render.js';
  * @typedef {(
  *  factory.FactoryActorData &
  *  render.RenderActorData &
+ *  collision.CollisionActorData &
  *  {
  *      shape: number,
  *  }

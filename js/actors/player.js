@@ -5,12 +5,14 @@ import * as render from '../components/render.js';
 import * as factory from '../components/factory.js';
 import * as input from '../components/input.js';
 import * as update from '../components/update.js';
+import * as collision from '../components/collision.js';
 
 /** @typedef {(
  *      factory.FactoryEngineData &
  *      update.UpdateEngineData &
  *      render.RenderEngineData &
  *      input.InputEngineData &
+ *      collision.CollisionEngineData &
  *      app.AppData &
  *      {
  *          managersData: PlayerManagerData[],
@@ -23,6 +25,7 @@ import * as update from '../components/update.js';
  *  factory.FactoryManagerData &
  *  update.UpdateManagerData &
  *  render.RenderManagerData &
+ *  collision.CollisionManagerData &
  *  {
  *      image: HTMLImageElement,
  *  }
@@ -33,7 +36,8 @@ import * as update from '../components/update.js';
  * @typedef {(
  *  factory.FactoryActorData &
  *  update.UpdateActorData &
- *  render.RenderActorData
+ *  render.RenderActorData &
+ *  collision.CollisionActorData
  * )} PlayerActorData 
  */
 
@@ -68,8 +72,17 @@ export const manager = {
      */
     handleUpdateActor(actorData, managerData, engineData) {
         actorData.imageOffset.y = -16;
+        const previousPos = {
+            x: actorData.pos.x,
+            y: actorData.pos.y
+        }
         actorData.pos.x += engineData.inputPos.x;
         actorData.pos.y += engineData.inputPos.y;
         actorData.zIndex = -actorData.pos.y;
+
+        for (let i = 0; i < actorData.collision.collisions.length; i++) {
+            const col = engineData.collisions[i];
+            console.log(col);
+        }
     }
 };

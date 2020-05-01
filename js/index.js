@@ -6,6 +6,7 @@ import * as factory from './components/factory.js';
 import * as input from './components/input.js';
 import * as render from './components/render.js';
 import * as update from './components/update.js';
+import * as collision from './components/collision.js';
 
 import * as background from './actors/background.js';
 import * as player from './actors/player.js';
@@ -33,12 +34,14 @@ window.onload = async function main() {
         factory.FactoryEngineData &
         input.InputEngineData &
         render.RenderEngineData &
-        update.UpdateEngineData
+        update.UpdateEngineData &
+        collision.CollisionEngineData
     )} */ (await app.create([
         factory.engine,
         input.engine,
         update.engine,
         render.engine,
+        collision.engine,
     ]));
     engineData.canvas.width = SCREEN.x;
     engineData.canvas.height = SCREEN.y;
@@ -81,12 +84,34 @@ window.onload = async function main() {
         },
         type: AT_PLAYER,
         zIndex: 0,
+        collision: {
+            collisions: [],
+            geoms: [
+                {
+                    maskA: 1,
+                    maskB: 0,
+                    rect: {
+                        x: 0,
+                        y: -4,
+                        w: 16,
+                        h: 4,
+                    }
+                }
+            ]
+        }
     };
     factory.createActor(engineData, aPlayer);
 
     let x = 0;
     let y = 16;
     for (let id = AID0_WALL; id <= AIDN_WALL; id++) {
+        const shape = (
+            ((x == 0 || x == (SCREEN.x - 16)) && y == 16) ? 4 :
+            (x == 0 || x == (SCREEN.x - 16)) ? 3 :
+            (y == 16 || y == (SCREEN.y - 16)) ? 2 :
+            y == 32 ? 1 :
+            0
+        );
         /**
          * @type {wall.WallActorData}
          */
@@ -98,13 +123,22 @@ window.onload = async function main() {
             zIndex: 0,
             imageOffset: { x: 0, y: 0 },
             pos: { x, y },
-            shape: (
-                ((x == 0 || x == (SCREEN.x - 16)) && y == 16) ? 4 :
-                (x == 0 || x == (SCREEN.x - 16)) ? 3 :
-                (y == 16 || y == (SCREEN.y - 16)) ? 2 :
-                y == 32 ? 1 :
-                0
-            ),
+            shape,
+            collision: (shape === 0 || shape === 1) ? null : {
+                collisions: [],
+                geoms: [
+                    {
+                        maskA: 0,
+                        maskB: 1,
+                        rect: {
+                            x: 0,
+                            y: 0,
+                            w: 16,
+                            h: 16
+                        }
+                    }
+                ]
+            }
         };
         factory.createActor(engineData, aWall);
         x += 16;

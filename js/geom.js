@@ -56,11 +56,12 @@ export function intersect(a, b, c) {
 
 /**
  * @param {Readonly<Rect>} a
- * @param {Readonly<Rect>} b 
+ * @param {Readonly<Rect>} b
+ * @param {Rect} [c] 
  */
-export function isIntersecting(a, b) {
-    intersect(a, b, tmpRect);
-    return tmpRect.w > 0 && tmpRect.h > 0;
+export function isIntersecting(a, b, c = tmpRect) {
+    intersect(a, b, c);
+    return c.w > 0 && c.h > 0;
 }
 const tmpRect = {x: 0, y: 0, w: 0, h: 0};
 
