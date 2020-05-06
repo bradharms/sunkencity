@@ -2,47 +2,41 @@
 #include <memory.h>;
 #include "app.h";
 
-app_App* app_create() {
-    app_App* const app = malloc(sizeof(app_App));
-    app->components = NULL;
+app_App* app_create(unsigned int actorPoolSize) {
+    app_App* const app = malloc((size_t) sizeof(app_App));
+    app->componentFirst = NULL;
+    app->componentLast = NULL;
+    app->actorFirst = NULL;
+    app->actorLast = NULL;
+    app->actorPoolSize = actorPoolSize;
+    app->actorPool = malloc(((size_t) sizeof(app_Actor)) * actorPoolSize);
+    app->actorPoolIndex = 0;
     return app;
 }
 
-app_Component* app_findLastComponent(app_App* const app) {
-    app_Component* component = app->components;
-    while (component) {
-        if (!component->next) {
-            return component;
-        }
-        component = component->next;
-    };
-    return NULL;
-}
-
 void app_start(app_App* const app) {
-    app_Component* component = app->components;
+    app_Component* component = app->componentFirst;
     while (component) {
-        if (component->onStart) {
-            component->onStart(component, app);
+        if (component->onComponentStart) {
+            component->onComponentStart(component, app);
         }
         component = component->next;
     }
 }
 
 void app_registerComponent(app_App *const app, app_Component* const component) {
-    app_Component* lastComponent = app_findLastComponent(app);
-    lastComponent->next = component;
+    app->componentLast->next = component;
     component->next = NULL;
-    if (component->onRegister) {
-        component->onRegister(component, app);
+    if (component->onComponentRegister) {
+        component->onComponentRegister(component, app);
     }
 }
 
 void app_update(app_App* const app) {
-    app_Component* component = app->components;
+    app_Component* component = app->componentFirst;
     while (component) {
-        if (component->onUpdate) {
-            component->onUpdate(component, app);
+        if (component->onComponentUpdate) {
+            component->onComponentUpdate(component, app);
         }
         component = component->next;
     }
@@ -50,38 +44,80 @@ void app_update(app_App* const app) {
 
 app_Actor* app_actorCreate(
     app_App* const app,
-    unsigned int componentCount,
     app_Component** const components,
     void** const initDatas
 ) {
-    unsigned int i;
-    size_t componentsLength = (sizeof(app_Component*) * componentCount);
-    size_t size = sizeof(app_Actor) + componentsLength;
-    for (i = 0; i < componentCount; i++) {
-        size += components[i]->segmentLength;
-    }
-    app_Actor* actor = malloc(size);
-    actor->flags = APP_ACTOR_FLAG_ACTIVE;
-    actor->componentCount = componentCount;
-    app_Component** actorComponents =
-        (app_Component**)(((uintptr_t) actor) + (sizeof(app_Actor)));
-    memcpy(actorComponents, components, componentsLength);
-    void* segment = (void*)(((uintptr_t) actorComponents) + componentsLength);
-    for (i = 0; i < componentCount; i++) {
-        app_Component* component = components[i];
-        if (component->onActorCreate) {
-            component->onActorCreate(
-                actor,
-                segment,
-                component,
-                app,
-                initDatas[i]
-            );
-        }
-        segment = ((uintptr_t) segment) + component->segmentLength;
-    }
-}
+    app_Component* component;
+    void* initData;
+    app_Component** comps;
+    void** datas;
 
-app_Component** app_actorFindComponents(app_Actor* const actor) {
+    // Bail if any required pool is empty
+    if (app->actorPoolIndex >= app->actorPoolSize) {
+        return NULL;
+    }
+    for (comps = components; comps; comps++) {
+        if ((*comps)->segmentPoolIndex >= (*comps)->segmentPoolSize) {
+            return NULL;
+        }
+    }
+
+    // Pull the next available actor out of the pool
+    app_Actor* actor = app->actorPool + app->actorPoolIndex;
+    app->actorPoolIndex++;
     
+    // Append the actor to the end of the actor chain
+    if (!app->actorFirst) {
+        app->actorFirst = actor;
+    }
+    if (app->actorLast) {
+        app->actorLast->next = actor;
+    }
+    actor->previous = app->actorLast;
+    app->actorLast = actor;
+    actor->next = NULL;
+
+    // Perform basic initialization on the actor
+    actor->flags = APP_ACTOR_FLAG_ACTIVE;
+    actor->segmentFirst = NULL;
+    actor->segmentLast = NULL;
+
+    // Perform component initialization on the actor
+    for (
+        datas = initDatas, comps = components;
+        initData = *datas, component = *components;
+        datas++, comps++
+    ) {
+        // Pull the next available segment out of the pool
+        app_Segment* segment = (app_Segment*)(
+            ((uintptr_t)component->segmentPool) +
+            (component->segmentLength * component->segmentPoolIndex)
+        );
+        component->segmentPoolIndex++;
+
+        // Append the segment to the end of the component segment chain
+        if (!component->segmentFirst) {
+            component->segmentFirst = segment;
+        }
+        if (component->segmentLast) {
+            component->segmentLast->nextComponent = segment;
+        }
+        segment->previousComponent = component->segmentLast;
+        component->segmentLast = segment;
+        segment->nextComponent = NULL;
+
+        // Append the segment to the end of the actor segment chain
+        if (!actor->segmentFirst) {
+            actor->segmentFirst = segment;
+        }
+        if (actor->segmentLast) {
+            actor->segmentLast->nextComponent = segment;
+        }
+        segment->previousActor = actor->segmentLast;
+        actor->segmentLast = segment;
+        segment->nextActor = NULL;
+
+        // Initialize the component-actor segment
+        component->onActorCreate(segment, actor, component, app, initData);
+    }
 }
