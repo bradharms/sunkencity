@@ -61,7 +61,7 @@ The heap is now initialized and we are ready to begin handling requests for allo
 
 Allocations and deallocations are generally random. There is no reliable way to determine any relationship between the order in which fragments are allocated and the order in which they are deallocated. Therefore, the only optimizations we will make will be based on where we know allocated fragments to be located within the heap and not the order of allocation.
 
-What follows is an allocator function that simply scans the allocation map from the beginning to find a sequence of clusters equal to the number requested, then marks the location of the beginning of the equence so that future allocations will know how far to skip past it.
+What follows is an allocator function that simply scans the allocation map from the beginning to find a sequence of clusters equal to the number requested, then marks the location of the beginning of the sequence so that future allocations will know how far to skip past it.
 
 ```c
 pheap_cluster_t* pheap_alloc(const pheap_size_t byteCount) {
