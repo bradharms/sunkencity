@@ -10,17 +10,17 @@ We can create a specialized heap manager as follows.
 
 1.) Define a cluster size (number of bytes per cluster):
 ```c
-#define(PHEAP_CLUSTER_SIZE, 64);
+#define PHEAP_CLUSTER_SIZE 64;
 ```
 
 2.) Define the number of clusters in the heap:
 ```c
-#define(PHEAP_CLUSTER_COUNT, 255);
+#define PHEAP_CLUSTER_COUNT 255;
 ```
 
 3.) Define a type for one byte in a cluster:
 ```c
-typedef pheap_byte_t unsigned char;
+typedef unsigned char pheap_byte_t;
 ```
 
 4.) Define a type for a cluster
