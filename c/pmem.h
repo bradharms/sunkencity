@@ -15,6 +15,11 @@
 #define PMEM_CLUSTER_COUNT 255
 
 /**
+ * Pmem-typed null
+ */
+#define PMEM_NULL (pmem_cluster_t*) 0
+
+/**
  * Type of a single byte
  */
 typedef unsigned char pmem_byte_t;

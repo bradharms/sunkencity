@@ -19,7 +19,7 @@ pmem_cluster_t* pmem_alloc(const pmem_size_t byteCount) {
     // If the required cluster count is 0 or is larger than the total number of
     // clusters available, we can't allocate anything.
     if (cCount == 0 || cCount >= PMEM_CLUSTER_SIZE) {
-        return (pmem_cluster_t*) 0;
+        return PMEM_NULL;
     }
     // Search for a fragment of the required length
     pmem_index_t fIndex = 0;
@@ -49,7 +49,7 @@ pmem_cluster_t* pmem_alloc(const pmem_size_t byteCount) {
         cIndex++;
     }
     // No contiguous region was found to be long enough for the request.
-    return (pmem_cluster_t*) 0;
+    return PMEM_NULL;
 }
 
 void pmem_free(pmem_cluster_t* const cluster) {

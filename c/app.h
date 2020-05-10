@@ -1,6 +1,7 @@
 #ifndef APP_H
 #define APP_H
 
+#include <stdlib.h>;
 #include <stdbool.h>;
 
 /**
@@ -79,27 +80,21 @@ typedef struct app_Component_t {
      */
     void (* const onComponentRegister)(
         /** Component being registered */
-        app_Component* const component,
-        /** App to which the component is being registered */
-        app_App* const app
+        app_Component* const component
     );
     /**
      * Fired when the app starts
      */
     void (* const onComponentStart)(
         /** Component that is being started */
-        app_Component* const component,
-        /** App that is being started */
-        app_App* const app
+        app_Component* const component
     );
     /**
      * Fired once per game loop
      */
     void (* const onComponentUpdate)(
         /** Component being updated */
-        app_Component* const component,
-        /** App being updated */
-        app_App* const app
+        app_Component* const component
     );
     /**
      * Fired when an actor with a given component is created
@@ -111,8 +106,6 @@ typedef struct app_Component_t {
         app_Actor* const actor,
         /** Component to which the actor is being added */
         app_Component* const component,
-        /** App containing the component being added */
-        app_App* const app,
         /** Initialization data specific to this component */
         void* const initData
     );
@@ -125,9 +118,7 @@ typedef struct app_Component_t {
         /** Actor being removed */
         app_Actor* const actor,
         /** Component from which the actor is being removed */
-        app_Component* const component,
-        /** App containing the component from which the actor is being removed*/
-        app_App* const app
+        app_Component* const component
     );
 } app_Component;
 
@@ -192,7 +183,7 @@ typedef struct app_Segment_t {
 /**
  * Create a new app
  */
-app_App* app_create(
+void app_create(
     /** Number of actors to allocate in the actor pool */
     unsigned int actorCount
 );
@@ -200,17 +191,17 @@ app_App* app_create(
 /**
  * Register a component to the app
  **/
-void app_registerComponent(app_App* const app, app_Component* const component);
+void app_registerComponent(app_Component* const component);
 
 /**
  * Begin the app's main game loop
  */
-void app_start(app_App* const app);
+void app_start();
 
 /**
  * Run an app update cycle
  */
-void app_update(app_Component* app);
+void app_update();
 
 /**
  * Create a new actor
@@ -218,8 +209,6 @@ void app_update(app_Component* app);
  * @return The actor, or NULL on failure
  */
 app_Actor* app_actorCreate(
-    /** App to which the actor will be added */ 
-    app_App* const app,
     /** Null-terminated array of pointers to components this actor will use */
     app_Component** const components,
     /** Array of initialization data for each component */
@@ -231,8 +220,6 @@ app_Actor* app_actorCreate(
  * @return Whether or not destruction was successful
  */
 bool app_actorDestroy(
-    /** App inside of which the actor will be destroyed */
-    app_App* const app,
     /** Actor to be destroyed */
     app_Actor* const actor
 );
@@ -242,8 +229,6 @@ bool app_actorDestroy(
  * @return A pointer to the segment
  */
 app_Segment* app_actorFindSegment(
-    /** Actor whose segment will be returned */
-    app_Actor* const actor,
     /** Component whose segment will be returned */
     app_Component* const component
 );
