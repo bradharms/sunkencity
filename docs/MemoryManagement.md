@@ -92,7 +92,7 @@ pheap_cluster_t* pheap_alloc(const pheap_size_t byteCount) {
             continue;
         }
         // There is at least one more unallocated cluster available in this
-        // unallocated reagion.
+        // unallocated region.
         uLength++;
         // We have found the required number of clusters.
         // Write the fragment length into the allocation map to allocate a
