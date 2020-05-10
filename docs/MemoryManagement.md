@@ -40,7 +40,7 @@ typedef pheap_size_t unsigned int;
 
 6.) Create a cluster allocation map:
 ```c
-pheap_index_t* pheap_allocations = malloc(HEAP_CLUSTER_COUNT);
+pheap_index_t pheap_allocations[HEAP_CLUSTER_COUNT];
 ```
 
 7.) Initialize the allocation map:
@@ -52,7 +52,7 @@ for (pheap_index_t cIndex = 0; cIndex < PHEAP_CLUSTER_COUNT; cIndex++) {
 
 8.) Allocate another array to contain all the heap's clusters:
 ```c
-pheap_cluster_t* pheap_clusters = calloc(PHEAP_CLUSTER_COUNT, PHEAP_CLUSTER_SIZE);
+pheap_cluster_t pheap_clusters[PHEAP_CLUSTER_COUNT];
 ```
 
 ### Allocation Requests
