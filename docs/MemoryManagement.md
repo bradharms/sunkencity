@@ -1,6 +1,6 @@
 # Memory Management
 
-## Psuedo-Heap Manager
+## Private Heap Manager
 
 We can create a specialized heap manager as follows.
 
