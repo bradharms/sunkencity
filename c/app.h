@@ -16,19 +16,19 @@ typedef struct app_App_t {
     /**
      * First component in the component chain
      */ 
-    app_Component* componentFirst;
+    struct app_Component_t* componentFirst;
     /**
      * Last component in the component chain
      */
-    app_Component* componentLast;
+    struct app_Component_t* componentLast;
     /**
      * First actor in the actor chain
      */
-    app_Actor* actorFirst;
+    struct app_Actor_t* actorFirst;
     /**
      * Last actor in the actor chain
      */
-    app_Actor* actorLast;
+    struct app_Actor_t* actorLast;
     /**
      * Number of actors available in the actor pool
      */
@@ -40,7 +40,7 @@ typedef struct app_App_t {
     /**
      * Pool of available actors
      */
-    app_Actor* actorPool;
+    struct app_Actor_t* actorPool;
 } app_App;
 
 /**
@@ -54,15 +54,15 @@ typedef struct app_Component_t {
     /**
      * Next component in the chain of components for the app
      */
-    app_Component* next;
+    struct app_Component_t* next;
     /**
      * First segment in the component's segment chain
      */
-    app_Segment* segmentFirst;
+    struct app_Segment_t* segmentFirst;
     /**
      * Last segment in the component's segment chain
      */
-    app_Segment* segmentLast;
+    struct app_Segment_t* segmentLast;
     /**
      * Number of segments in the pool
      */
@@ -80,32 +80,32 @@ typedef struct app_Component_t {
      */
     void (* const onComponentRegister)(
         /** Component being registered */
-        app_Component* const component
+        struct app_Component_t* const component
     );
     /**
      * Fired when the app starts
      */
     void (* const onComponentStart)(
         /** Component that is being started */
-        app_Component* const component
+        struct app_Component_t* const component
     );
     /**
      * Fired once per game loop
      */
     void (* const onComponentUpdate)(
         /** Component being updated */
-        app_Component* const component
+        struct app_Component_t* const component
     );
     /**
      * Fired when an actor with a given component is created
      */
     void (* const onActorCreate)(
         /** Segment of the actor for this component */
-        app_Segment* const segment,
+        struct app_Segment_t* const segment,
         /** Actor being added */
-        app_Actor* const actor,
+        struct app_Actor_t* const actor,
         /** Component to which the actor is being added */
-        app_Component* const component,
+        struct app_Component_t* const component,
         /** Initialization data specific to this component */
         void* const initData
     );
@@ -114,11 +114,11 @@ typedef struct app_Component_t {
      */
     void (* const onActorRemove)(
         /** Segment being removed */
-        app_Segment* const segment,
+        struct app_Segment_t* const segment,
         /** Actor being removed */
-        app_Actor* const actor,
+        struct app_Actor_t* const actor,
         /** Component from which the actor is being removed */
-        app_Component* const component
+        struct app_Component_t* const component
     );
 } app_Component;
 
@@ -135,19 +135,19 @@ typedef struct app_Actor_t {
     /**
      * First segment in the chain of segments for this actor
      */
-    app_Segment* segmentFirst;
+    struct app_Segment_t* segmentFirst;
     /**
      * Last segment in the chain of segments for this actor
      */
-    app_Segment* segmentLast;
+    struct app_Segment_t* segmentLast;
     /**
      * Next actor in the chain of actors for the app or actor pool
      */
-    app_Actor* next;
+    struct app_Actor_t* next;
     /**
      * Previous actor in the chain of actors for the app or actor pool
      */
-    app_Actor* previous;
+    struct app_Actor_t* previous;
 } app_Actor;
 
 /**
@@ -157,27 +157,27 @@ typedef struct app_Segment_t {
     /**
      * Actor for this segment
      */
-    app_Actor* actor;
+    struct app_Actor_t* actor;
     /**
      * Component for this segment
      */
-    app_Component* component;
+    struct app_Component_t* component;
     /**
      * Next segment for the segment's component
      */
-    app_Segment* nextComponent;
+    struct app_Segment_t* nextComponent;
     /**
      * Previous segment for the segment's component
      */
-    app_Segment* previousComponent;
+    struct app_Segment_t* previousComponent;
     /**
      * Next segment for the segment's actor
      */
-    app_Segment* nextActor;
+    struct app_Segment_t* nextActor;
     /**
      * Previous segment for the segment's actor
      */
-    app_Segment* previousActor;
+    struct app_Segment_t* previousActor;
 } app_Segment;
 
 /**
@@ -191,7 +191,7 @@ void app_create(
 /**
  * Register a component to the app
  **/
-void app_registerComponent(app_Component* const component);
+void app_registerComponent(struct app_Component_t* const component);
 
 /**
  * Begin the app's main game loop
@@ -208,9 +208,9 @@ void app_update();
  * 
  * @return The actor, or NULL on failure
  */
-app_Actor* app_actorCreate(
+struct app_Actor_t* app_actorCreate(
     /** Null-terminated array of pointers to components this actor will use */
-    app_Component** const components,
+    struct app_Component_t** const components,
     /** Array of initialization data for each component */
     void** const initDatas
 );
@@ -221,16 +221,16 @@ app_Actor* app_actorCreate(
  */
 bool app_actorDestroy(
     /** Actor to be destroyed */
-    app_Actor* const actor
+    struct app_Actor_t* const actor
 );
 
 /**
  * Find the segment matching the given actor and component
  * @return A pointer to the segment
  */
-app_Segment* app_actorFindSegment(
+struct app_Segment_t* app_actorFindSegment(
     /** Component whose segment will be returned */
-    app_Component* const component
+    struct app_Component_t* const component
 );
 
 #endif // APP_H

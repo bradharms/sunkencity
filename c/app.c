@@ -1,16 +1,18 @@
-#include "pmem.h";
-#include "app.h";
+#include "pmem.h"
+#include "app.h"
+#include <stdint.h>
 
 app_App* app_app;
 
 void app_create(unsigned int actorPoolSize) {
-    app_app = pmem_alloc(sizeof(app_App));
+    app_app = (app_App*) pmem_alloc(sizeof(app_App));
     app_app->componentFirst = PMEM_NULL;
     app_app->componentLast = PMEM_NULL;
     app_app->actorFirst = PMEM_NULL;
     app_app->actorLast = PMEM_NULL;
     app_app->actorPoolSize = actorPoolSize;
-    app_app->actorPool = pmem_alloc(sizeof(app_Actor) * actorPoolSize);
+    app_app->actorPool =
+        (app_Actor*) pmem_alloc(sizeof(app_Actor) * actorPoolSize);
     app_app->actorPoolIndex = 0;
 }
 
@@ -89,7 +91,7 @@ app_Actor* app_actorCreate(
     ) {
         // Pull the next available segment out of the pool
         app_Segment* segment = (app_Segment*)(
-            ((uintptr_t)component->segmentPool) +
+            ((uintptr_t) component->segmentPool) +
             (component->segmentLength * component->segmentPoolIndex)
         );
         component->segmentPoolIndex++;
@@ -119,4 +121,6 @@ app_Actor* app_actorCreate(
         // Initialize the component-actor segment
         component->onActorCreate(segment, actor, component, initData);
     }
+
+    return actor;
 }

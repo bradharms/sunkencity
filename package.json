@@ -13,6 +13,7 @@
   "license": "ISC",
   "devDependencies": {
     "env-cmd": "^10.1.0",
+    "glob": "^7.1.6",
     "http-server": "^0.12.1",
     "shelljs": "^0.8.4"
   },

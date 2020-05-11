@@ -1,4 +1,4 @@
-#include "pmem.h";
+#include "pmem.h"
 
 pmem_index_t pmem_allocations[PMEM_CLUSTER_COUNT];
 pmem_cluster_t pmem_clusters[PMEM_CLUSTER_COUNT];
@@ -9,7 +9,7 @@ void pmem_init() {
     }
 }
 
-pmem_cluster_t* pmem_alloc(const pmem_size_t byteCount) {
+void* pmem_alloc(const pmem_size_t byteCount) {
     // Determine the number of clusters we need based on the byte count
     const pmem_index_t cCount =
         // This is integer division. The output is rounded down.
@@ -52,6 +52,6 @@ pmem_cluster_t* pmem_alloc(const pmem_size_t byteCount) {
     return PMEM_NULL;
 }
 
-void pmem_free(pmem_cluster_t* const cluster) {
-    pmem_allocations[cluster - pmem_clusters] = 0;
+void pmem_free(void* const cluster) {
+    pmem_allocations[((pmem_cluster_t*) cluster) - pmem_clusters] = 0;
 }

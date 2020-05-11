@@ -17,7 +17,7 @@
 /**
  * Pmem-typed null
  */
-#define PMEM_NULL (pmem_cluster_t*) 0
+#define PMEM_NULL (void*) 0
 
 /**
  * Type of a single byte
@@ -58,7 +58,7 @@ void pmem_init();
  * of the beginning of the sequence so that future allocations will know how far
  * to skip past it.
  */
-pmem_cluster_t* pmem_alloc(const pmem_size_t byteCount);
+void* pmem_alloc(const pmem_size_t byteCount);
 
 /**
  * Deallocates a fragment.
@@ -66,6 +66,6 @@ pmem_cluster_t* pmem_alloc(const pmem_size_t byteCount);
  * Deallocating a fragment simply means marking the first cluster in the
  * allocation map as having a fragment length of 0.
  */
-void pmem_free(pmem_cluster_t* const cluster);
+void pmem_free(void* const cluster);
 
 #endif // PMEM_H

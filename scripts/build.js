@@ -2,10 +2,11 @@
 // @ts-check
 const path = require('path');
 const sh = require('shelljs');
+const glob = require('glob');
 
 function main() {
     sh.test('-d', process.env.BUILD_DIR) || sh.mkdir(process.env.BUILD_DIR);
-    cc('main.c', 'index.html');
+    cc(glob.sync(srcDir('**/*.c')).join(' '), buildDir('index.html'));
 }
 
 /**
@@ -21,6 +22,6 @@ const buildDir = (filename) => path.resolve(process.env.BUILD_DIR, filename);
  * @param {string} fileOut
  */
 const cc = (fileIn, fileOut) =>
-    sh.exec(`emcc ${srcDir(fileIn)} -o ${buildDir(fileOut)}`);
+    sh.exec(`emcc ${fileIn} -o ${fileOut}`);
 
 main();
