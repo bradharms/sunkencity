@@ -1,8 +1,8 @@
 #ifndef APP_H
 #define APP_H
 
-#include <stdlib.h>;
-#include <stdbool.h>;
+#include <stdlib.h>
+#include <stdbool.h>
 
 /**
  * Bit of the actor flag indicating whether the actor is active

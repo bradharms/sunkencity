@@ -4,6 +4,7 @@ const path = require('path');
 const sh = require('shelljs');
 
 function main() {
+    sh.test('-d', process.env.BUILD_DIR) || sh.mkdir(process.env.BUILD_DIR);
     cc('main.c', 'index.html');
 }
 
